@@ -17,7 +17,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def hello():
-	return f"<h1>hello world</h1><p>report has table count of {report['table-count'] }</p><p>{csvData}</p>"
+	return "<h1>hello world</h1><p>report has table count of {report['table-count'] }</p><p>{csvData}</p>"
 
 @app.route("/hello.html")
 def hey():
