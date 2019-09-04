@@ -1,28 +1,29 @@
-from flask import Flask
-from goodtables import validate
-import csv
-import requests
+from bottle import route, run, get, post, request
+import pandas as pd 
 
-CSV_URL = "http://www.stat.umn.edu/geyer/3701/data/p3p3.csv"
+@route('/')
+def index():
+    return "Hello!"
 
-with requests.get(CSV_URL, stream=True) as r:
-	lines = (line.decode('utf-8') for line in r.iter_lines())
-	csvData = ""
-	for row in csv.reader(lines):
-		csvData = csvData + str(row)
+@get('/csv') 
+def csv():
+    return '''
+        <form action="/csv" method="post" enctype="multipart/form-data">
+            <input name="data" type="file" accept=".csv" />
+            <input value="check csv file" type="submit" />
+        </form>
+    '''
 
-report = validate(lines)
+@post('/csv')
+def do_csv():
+    if request.files.get('data'):
+        dataFile = request.files.get('data')
+        data = pd.read_csv(dataFile.file, index_col=0)
+        return f"""
+        <p>File name: {dataFile.filename}</p>
+        <p>File name: {data.head()}</p>
+        """
+    else:
+        return "<p>Login failed.</p>"
 
-app = Flask(__name__)
-
-@app.route("/")
-def hello():
-	return f"<h1>hello world</h1><p>report has table count of {report['table-count'] }</p><p>{csvData}</p>"
-
-@app.route("/hello.html")
-def hey():
-	return "<h1>Boo!</h1>"
-
-
-if __name__ == "__main__":
-	app.run(debug=True)
+run(host='localhost', port=8080, debug=True)
