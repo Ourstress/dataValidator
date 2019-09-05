@@ -1,11 +1,14 @@
-from bottle import route, run, get, post, request
+from flask import Flask, request
+import requests
 import pandas as pd 
 
-@route('/')
-def index():
-    return "Hello!"
+app = Flask(__name__)
 
-@get('/csv') 
+@app.route("/")
+def hello():
+	return "<h1>hello world</h1><p>Hello hello there</p>"
+
+@app.route('/csv', methods=['GET']) 
 def csv():
     return '''
         <form action="/csv" method="post" enctype="multipart/form-data">
@@ -14,11 +17,11 @@ def csv():
         </form>
     '''
 
-@post('/csv')
+@app.route('/csv', methods=['POST'])
 def do_csv():
-    if request.files.get('data'):
-        dataFile = request.files.get('data')
-        data = pd.read_csv(dataFile.file, index_col=0)
+    if request.files:
+        dataFile = request.files['data']
+        data = pd.read_csv(dataFile, index_col=0)
         return f"""
         <p>File name: {dataFile.filename}</p>
         <p>File name: {data.head()}</p>
@@ -26,4 +29,5 @@ def do_csv():
     else:
         return "<p>Login failed.</p>"
 
-run(host='localhost', port=8080, debug=True)
+if __name__ == "__main__":
+	app.run(debug=True) 
