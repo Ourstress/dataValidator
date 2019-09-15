@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, render_template
 import requests
 import pandas as pd 
 
@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def hello():
-	return "<h1>hello world</h1><p>Hello hello there</p>"
+	return render_template('index.html')
 
 @app.route('/csv', methods=['GET']) 
 def csv():
@@ -21,10 +21,10 @@ def csv():
 def do_csv():
     if request.files:
         dataFile = request.files['data']
-        data = pd.read_csv(dataFile, index_col=0)
+        data = pd.read_csv(dataFile, index_col=0, header=None)
         return f"""
         <p>File name: {dataFile.filename}</p>
-        <p>File name: {data.head()}</p>
+        {data.head().to_html()}
         """
     else:
         return "<p>Login failed.</p>"
